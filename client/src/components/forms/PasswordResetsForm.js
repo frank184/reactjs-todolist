@@ -11,7 +11,7 @@ class PasswordResetsForm extends Base {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <input type="text" className="form-control" onChange={e => this.handleChange(e)} />
+            <input autocomplete="off" type="text" className="form-control" onChange={e => this.handleChange(e)} />
           </div>
         </div>
         <div className="col-sm-4">

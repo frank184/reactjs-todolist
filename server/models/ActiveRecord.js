@@ -38,6 +38,10 @@ class ActiveRecord extends ActiveModel{
     return pluralize(this.constructor.name).toLowerCase()
   }
 
+  static new(options) {
+    return new this(options)
+  }
+
   static all(next) {
     return this.where({}, next)
   }
@@ -47,6 +51,24 @@ class ActiveRecord extends ActiveModel{
     var sql = `SELECT * FROM ${this.table} WHERE id = ?`
     var params = [id]
     console.log(' -- [SQL] ' + sql, params)
+    var db = new DBAdapter()
+    db.get(sql, params, (err, row) => {
+      if (err) throw err
+      if (row) task = new this(row)
+      if (next) next.call(this, task)
+    }).close()
+    return task
+  }
+
+  static findBy(conditions, next) {
+    var task
+    var where = []
+    var params = []
+    for (var key in conditions) {
+      where.push(key + ' = ?')
+      params.push(conditions[key])
+    }
+    var sql = `SELECT * FROM ${this.table} WHERE ${where} `
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -94,8 +116,7 @@ class ActiveRecord extends ActiveModel{
         task.id = row.id // ?
         if (next) next.call(this, task)
       })
-    })
-    db.close()
+    }).close()
     return task
   }
 
@@ -118,8 +139,7 @@ class ActiveRecord extends ActiveModel{
         this.id = row.id
         if (next) next.call(this)
       })
-    })
-    db.close()
+    }).close()
     return true
   }
 

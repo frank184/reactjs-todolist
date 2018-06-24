@@ -2,7 +2,7 @@ import React from 'react'
 import {Alert} from 'react-bootstrap'
 import PropTypes from 'prop-types'
 
-let Flash = (props) => {
+const Flash = (props) => {
   var alert = null
   if (props.show) {
     alert = <Alert id="flash"
@@ -10,8 +10,7 @@ let Flash = (props) => {
                     fadespeed={props.fadeSpeed}
                     className={(props.fade ? 'fade-out' : '')}
                     bsStyle={props.bsStyle}
-                    onDismiss={props.handleDismiss}
-                    onAction={props.handleAction}>
+                    onDismiss={props.handleDismiss}>
       <div className="container">
         {props.children}
       </div>

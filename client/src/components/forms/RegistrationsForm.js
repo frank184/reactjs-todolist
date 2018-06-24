@@ -3,29 +3,42 @@ import Base from './Base'
 import {Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 
+import RegistrationsAPI from '../../api/RegistrationsAPI'
+
 class RegistrationsForm extends Base {
   constructor(props) {
     super(props)
+    this.mode = props.mode
     this.submitText = props.submitText
-    this.state = props.state || {
-      email: null,
-      firstName: null,
-      lastName: null
-    }
     this.fieldNames = {
       email: 'Email',
-      firstName: 'First Name',
-      lastName: 'Last Name'
+      first_name: 'First Name',
+      last_name: 'Last Name'
+    }
+    this.state = {
+      user: {
+        id: props.user.id,
+        email: props.user.email,
+        first_name: props.user.first_name,
+        last_name: props.user.last_name
+      }
     }
   }
 
   handleSubmit(e) {
-    alert('Sign Up Submitted!')
+    if (this.state.mode === 'new') {
+      RegistrationsAPI.create(this.state.user)
+      .then(userJSON => this.setState({user: userJSON}))
+    } else {
+      RegistrationsAPI.update(this.state.user)
+      .then(userJSON => this.setState({user: userJSON}))
+    }
   }
 
   render() {
     var fields = []
-    for (var key in this.state) {
+    for (var key in this.state.user) {
+      if (key === 'id') continue
       fields.push(
         <div key={key} className="row">
           <div className="col-sm-2">
@@ -33,12 +46,16 @@ class RegistrationsForm extends Base {
           </div>
           <div className="col-sm-6">
             <div className="form-group">
-              <input id={key} type="text" className="form-control" onChange={e => this.handleChange(e)} value={this.state[key]}/>
+              <input autocomplete="off" id={key} type="text" className="form-control"
+                value={this.state.user[key]} onChange={e => this.handleChange(e)} />
             </div>
           </div>
         </div>
       )
     }
+
+    if (this.mode !== 'new')
+      fields.push(<input type="hidden" id="id" value={this.state.user.id} />)
 
     return <form className="form">
       {fields}
@@ -49,6 +66,18 @@ class RegistrationsForm extends Base {
         {this.submitText}
       </Button>
     </form>
+  }
+}
+
+RegistrationsForm.defaultProps = {
+  mode: 'new',
+  state: {
+    user: {
+      id: -1,
+      email: '',
+      first_name: '',
+      last_name: ''
+    }
   }
 }
 

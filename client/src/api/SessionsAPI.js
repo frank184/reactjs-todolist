@@ -1,8 +1,8 @@
 import Base from './Base'
 
 class SessionsAPI extends Base {
-  static create() {
-    return this.api('/sessions.json', 'POST')
+  static create(user) {
+    return this.api('/sessions.json', 'POST', user)
   }
 
   static delete() {

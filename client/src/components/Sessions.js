@@ -3,8 +3,8 @@ import SessionsForm from './forms/SessionsForm'
 
 var Sessions = {
   New: () => (
-    <div class="container">
-      <h1 class="page-header">Sign In</h1>
+    <div className="container">
+      <h1 className="page-header">Sign In</h1>
       <SessionsForm />
     </div>
   ),
