@@ -1,21 +1,21 @@
 var ApplicationController = require('./application_controller')
-var User = require('../models/User').initialize()
 
 class RegistrationsController extends ApplicationController {
   /* POST registrations.json */
-  create(req, res, next) {
-    var user = new User(req.body)
-    user.save(() => res.json(user))
+  create() {
+    var user = User.new(this.req.body)
+    user.save(() => this.res.json(user))
   }
 
   /* PUT registrations.json */
-  update(req, res, next) {
-    
+  update() {
+    currentUser(user => user.update(user => this.res.json(user)))
+    this.res.send(401).send()
   }
 
   /* DELETE registrations.json */
-  delete(req, res, next) {
-
+  delete() {
+    currentUser(user => user.delete(() => this.res.json(user)))
   }
 }
 

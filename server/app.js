@@ -18,6 +18,10 @@ app.use(cookieParser());
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+// app models
+global.Task = Task = require('./models/Task').initialize()
+global.User = User = require('./models/User').initialize()
+
 // app root
 app.use('/', require('./routes/tasks'));
 // tasks routes

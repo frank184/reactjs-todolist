@@ -1,21 +1,19 @@
-var wait = require('wait.for');
 var pluralize = require('pluralize')
 var DBAdapter = require('../db/connection')
+var SyncDBAdapter = require('../db/sync_connection')
 
 var ActiveModel = require('./ActiveModel')
 
-class ActiveRecord extends ActiveModel{
-  constructor(options = {}) {
-    super()
+class ActiveRecord extends ActiveModel {
+  constructor(options) {
+    super(options)
     this.loadColumns(options)
   }
 
   loadColumns(options) {
     this.constructor.columns.forEach((column) => {
-      if (column.type == 'boolean')
-        this[column.name] = (options[column.name] === 1 ? true : false)
-      else
-        this[column.name] = options[column.name]
+      if (column.type == 'boolean') this[column.name] = (options[column.name] === 1 ? true : false)
+      else this[column.name] = options[column.name]
     })
   }
 
@@ -23,10 +21,8 @@ class ActiveRecord extends ActiveModel{
     this.columns = []
     var sql = `PRAGMA table_info(${this.table})`
     console.log(' -- [SQL] ' + sql)
-    var db = new DBAdapter()
-    db.all(sql, [], (err, rows) => {
-      this.columns = rows
-    }).close()
+    var db = new SyncDBAdapter()
+    this.columns = db.prepare(sql).all()
     return this
   }
 

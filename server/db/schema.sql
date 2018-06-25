@@ -11,7 +11,8 @@ CREATE TABLE users(
   email varchar(255) NOT NULL,
   encrypted_password varchar(255) NOT NULL,
   first_name varchar(255) NOT NULL,
-  last_name varchar(255) NOT NULL
+  last_name varchar(255) NOT NULL,
+  session_token varchar(255)
 );
 
 -- UNIQUE INDEX ON users.email

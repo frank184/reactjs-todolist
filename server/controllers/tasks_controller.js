@@ -1,37 +1,36 @@
 var ApplicationController = require('./application_controller')
-var Task = require('../models/Task').initialize()
 
 class TasksController extends ApplicationController {
   /* GET tasks.json */
-  index(req, res, next) {
-    Task.all((tasks) => res.json(tasks))
+  index() {
+    Task.all((tasks) => this.res.json(tasks))
   }
 
   /* POST tasks.json */
-  create(req, res, next) {
-    var task = new Task(req.body)
-    task.save(() => res.json(task))
+  create() {
+    var task = new Task(this.req.body)
+    task.save(() => this.res.json(task))
   }
 
   /* PUT tasks/1.json */
-  update(req, res, next) {
-    var taskId = req.params.taskId
-    Task.find(taskId, (task) => {
+  update() {
+    var id = this.req.params.id
+    Task.find(id, (task) => {
       if (task)
-        task.update(req.body, () => res.json(task))
+        task.update(this.req.body, () => this.res.json(task))
       else
         res.status(404).send()
     })
   }
 
   /* DELETE tasks/1.json */
-  delete(req, res, next) {
-    var taskId = req.params.taskId
-    Task.find(taskId, (task) => {
+  delete() {
+    var id = this.req.params.id
+    Task.find(id, (task) => {
       if (task)
-        task.delete(() => res.json(task))
+        task.delete(() => this.res.json(task))
       else
-        res.status(404).send()
+        this.res.status(404).send()
     })
   }
 }

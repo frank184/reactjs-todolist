@@ -10,6 +10,15 @@ class Task extends ActiveRecord {
     this.validatesPresenceOf('title')
     return this.errorsEmpty()
   }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      completed: this.completed,
+      errors: this.errors
+    }
+  }
 }
 
 module.exports = Task
