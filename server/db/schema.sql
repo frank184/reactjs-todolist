@@ -17,3 +17,4 @@ CREATE TABLE users(
 
 -- UNIQUE INDEX ON users.email
 CREATE UNIQUE INDEX idx_email ON users (email);
+CREATE UNIQUE INDEX idx_session_token ON users (email);

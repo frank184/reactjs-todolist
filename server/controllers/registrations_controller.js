@@ -4,7 +4,14 @@ class RegistrationsController extends ApplicationController {
   /* POST registrations.json */
   create() {
     var user = User.new(this.req.body)
-    user.save(() => this.res.json(user))
+    user.save((saved) => {
+      if (saved) {
+        let sessionToken = user.generateSessionToken()
+        this.res.cookie('sessionToken', sessionToken.toString('base64'))
+        user.save()
+      }
+      this.res.json(user)
+    })
   }
 
   /* PUT registrations.json */

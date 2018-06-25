@@ -5,7 +5,7 @@ var SyncDBAdapter = require('../db/sync_connection')
 var ActiveModel = require('./ActiveModel')
 
 class ActiveRecord extends ActiveModel {
-  constructor(options) {
+  constructor(options = {}) {
     super(options)
     this.loadColumns(options)
   }
@@ -13,14 +13,19 @@ class ActiveRecord extends ActiveModel {
   loadColumns(options) {
     this.constructor.columns.forEach((column) => {
       if (column.type == 'boolean') this[column.name] = (options[column.name] === 1 ? true : false)
-      else this[column.name] = options[column.name]
+      else if (!this[column.name]) this[column.name] = options[column.name]
     })
   }
 
-  static initialize() {
+  static init(log) {
+    return this.initialize(log)
+  }
+
+  static initialize(log = false) {
+    this.log = log
     this.columns = []
     var sql = `PRAGMA table_info(${this.table})`
-    console.log(' -- [SQL] ' + sql)
+    if(this.log) console.log(' -- [SQL] ' + sql)
     var db = new SyncDBAdapter()
     this.columns = db.prepare(sql).all()
     return this
@@ -46,7 +51,7 @@ class ActiveRecord extends ActiveModel {
     var task
     var sql = `SELECT * FROM ${this.table} WHERE id = ?`
     var params = [id]
-    console.log(' -- [SQL] ' + sql, params)
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -65,12 +70,42 @@ class ActiveRecord extends ActiveModel {
       params.push(conditions[key])
     }
     var sql = `SELECT * FROM ${this.table} WHERE ${where} `
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
       if (row) task = new this(row)
       if (next) next.call(this, task)
     }).close()
+    return task
+  }
+
+  static findSync(id, next) {
+    var task
+    var sql = `SELECT * FROM ${this.table} WHERE id = ?`
+    var params = [id]
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
+    var db = new SyncDBAdapter()
+    var row = db.prepare(sql).get(params)
+    if (row) task = new this(row)
+    if (next) next.call(this, task)
+    return task
+  }
+
+  static findBySync(conditions, next) {
+    var task
+    var where = []
+    var params = []
+    for (var key in conditions) {
+      where.push(key + ' = ?')
+      params.push(conditions[key])
+    }
+    var sql = `SELECT * FROM ${this.table} WHERE ${where} `
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
+    var db = new SyncDBAdapter()
+    var row = db.prepare(sql).get(params)
+    if (row) task = new this(row)
+    if (next) next.call(this, task)
     return task
   }
 
@@ -83,7 +118,7 @@ class ActiveRecord extends ActiveModel {
       params.push(conditions[key])
     }
     var sql = `SELECT * FROM ${this.table} ${where.length !== 0 ? 'WHERE' : ''} ${where}`
-    console.log(' -- [SQL] ' + sql, params)
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.all(sql, params, (err, rows) => {
       rows.forEach((row) => { tasks.push(new this(row)) })
@@ -94,7 +129,10 @@ class ActiveRecord extends ActiveModel {
 
   static create(options, next) {
     var task = new this(options)
-    if ( !task.valid() ) return false
+    if ( !task.valid() ) {
+      if (next) next.call(this, task)
+      return false
+    }
     var sanitized_columns = this.columns.slice(1)
     var params = sanitized_columns.map((column) => {
       return (column.type === 'boolean' ? (task[column.name] === true ? 1 : 0) : task[column.name])
@@ -102,7 +140,7 @@ class ActiveRecord extends ActiveModel {
     var sanitized_column_names = sanitized_columns.map((column) => { return column.name })
     var values = Array.from(sanitized_column_names).fill('?')
     var sql = `INSERT INTO ${this.table} (${sanitized_column_names}) VALUES (${values});`
-    console.log(' -- [SQL] ' + sql, params)
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.serialize(() => {
       db.get(sql, params, (err, row) => {
@@ -110,14 +148,17 @@ class ActiveRecord extends ActiveModel {
       }).get('SELECT last_insert_rowid() AS id', [], (err, row) => {
         if (err) throw err
         task.id = row.id // ?
-        if (next) next.call(this, task)
+        if (next) next.call(this, task, true)
       })
     }).close()
     return task
   }
 
   create(next) {
-    if ( !this.valid() ) return false
+    if ( !this.valid() ) {
+      if (next) next.call(this)
+      return false
+    }
     var sanitized_columns = this.constructor.columns.slice(1)
     var params = sanitized_columns.map((column) => {
       return (column.type === 'boolean' ? (this[column.name] === true ? 1 : 0) : this[column.name])
@@ -125,7 +166,7 @@ class ActiveRecord extends ActiveModel {
     var sanitized_column_names = sanitized_columns.map((column) => { return column.name })
     var values = Array.from(sanitized_column_names).fill('?')
     var sql = `INSERT INTO ${this.table} (${sanitized_column_names}) VALUES (${values});`
-    console.log(' -- [SQL] ' + sql, params)
+    if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.serialize(() => {
       db.get(sql, params, (err, row) => {
@@ -133,14 +174,17 @@ class ActiveRecord extends ActiveModel {
       }).get('SELECT last_insert_rowid() AS id', [], (err, row) => {
         if (err) throw err
         this.id = row.id
-        if (next) next.call(this)
+        if (next) next.call(this, true)
       })
     }).close()
     return true
   }
 
   update(options = {}, next) {
-    if ( !this.valid() ) return false
+    if ( !this.valid() ) {
+      if (next) next.call(this)
+      return false
+    }
     this.constructor.columns.forEach(column => {
       if(column.name !== 'id' && options[column.name] !== undefined)
         this[column.name] = options[column.name]
@@ -151,11 +195,11 @@ class ActiveRecord extends ActiveModel {
     })
     var sanitized_columns = sanitized_columns.map((column) => { return column.name + ' = ?' })
     var sql = `UPDATE ${this.table} SET ${sanitized_columns} WHERE id = ${this.id};`
-    console.log(' -- [SQL] ' + sql, params)
+    if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
-      if (next) next.call(this)
+      if (next) next.call(this, true)
     }).close()
     return true
   }
@@ -168,15 +212,19 @@ class ActiveRecord extends ActiveModel {
   }
 
   save(next) {
-    if ( !this.valid() ) return next.call(this)
-    this.createOrUpdate(next)
-    return true
+    if ( !this.valid() ) {
+      if (next) next.call(this, false)
+      return false
+    } else {
+      this.createOrUpdate(next)
+      return true
+    }
   }
 
   static delete(id, next) {
     var sql = `DELETE FROM ${this.table} WHERE id = ?`
     var params = [id]
-    console.log(' -- [SQL] ' + sql, params)
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -187,7 +235,7 @@ class ActiveRecord extends ActiveModel {
   delete(next) {
     var sql = `DELETE FROM ${this.table} WHERE id = ?`
     var params = [this.id]
-    console.log(' -- [SQL] ' + sql, params)
+    if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -199,7 +247,7 @@ class ActiveRecord extends ActiveModel {
     if (!id) return next.call(this, false)
     var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
     var params = [id]
-    console.log(' -- [SQL] ' + sql, params)
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -211,7 +259,7 @@ class ActiveRecord extends ActiveModel {
     if (!this.id) return next.call(this, false)
     var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
     var params = [this.id]
-    console.log(' -- [SQL] ' + sql, params)
+    if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err
@@ -223,7 +271,7 @@ class ActiveRecord extends ActiveModel {
     if (!this.id) return next.call(this, true)
     var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
     var params = [this.id]
-    console.log(' -- [SQL] ' + sql, params)
+    if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
       if (err) throw err

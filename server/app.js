@@ -19,8 +19,8 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 // app models
-global.Task = Task = require('./models/Task').initialize()
-global.User = User = require('./models/User').initialize()
+global.Task = Task = require('./models/Task').init(true)
+global.User = User = require('./models/User').init(true)
 
 // app root
 app.use('/', require('./routes/tasks'));

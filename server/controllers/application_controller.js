@@ -1,15 +1,42 @@
+var ActionDispatcher = require('./action_dispatcher')
 var secureToken = require('secure-token')
 
-var ActionDispatcher = require('./action_dispatcher')
-
 class ApplicationController extends ActionDispatcher {
-  authenticate() {
+  beforeAction() {
+    console.log('=========== COOKIES ===========')
+    console.log(this.req.cookies)
+    console.log('======================================')
+    this.currentUser(user => {
+      console.log('=========== LOGGED IN USER ===========')
+      console.log(user)
+      console.log('======================================')
+    })
+  }
 
+  authenticate(next) {
+    this.isSignedIn(signedIn => {
+      if (signedIn)
+        if (next) next.call(this)
+      else return this.res.status(403).send()
+    })
+  }
+
+  isSignedIn(next) {
+    this.currentUser(user => {
+      if (next) next.call(this, user ? true : false)
+    })
   }
 
   currentUser(next) {
-    // Implement Sessions first
-    if (next) next.call(this, user)
+    let hash = ''
+    let sessionToken = this.req.cookies.sessionToken
+    if (sessionToken) {
+      let buffer = Buffer.from(sessionToken, 'base64')
+      hash = secureToken.hash(buffer, 'session').toString('base64')
+    }
+    User.findBy({session_token: hash}, user => {
+      if (next) next.call(this, user)
+    })
   }
 }
 

@@ -7,9 +7,8 @@ class ActionDispatcher {
     this[action]()
     this.afterAction()
   }
-
-  beforeAction() { }
-  afterAction() { }
+  beforeAction() {}
+  afterAction() {}
 }
 
 module.exports = ActionDispatcher

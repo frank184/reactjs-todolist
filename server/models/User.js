@@ -1,17 +1,15 @@
 var ActiveRecord = require('./ActiveRecord')
 var bcrypt = require('bcrypt')
-var secureToken = require('secure-token')
+var SecureToken = require('secure-token')
 
 class User extends ActiveRecord {
-  constructor(options) {
-    super(options)
+  set password(value) {
+    this._password = value
+    this.encrypted_password = bcrypt.hashSync(value, 10)
   }
 
-  // Y U NO WORK
-  set password(value) {
-    bcrypt.hash(value, 10, (err, hash) => {
-      this.encrypted_password = hash
-    })
+  get password() {
+    return this._password
   }
 
   isPassword(password, next) {
@@ -22,9 +20,8 @@ class User extends ActiveRecord {
   }
 
   generateSessionToken(next) {
-    let sessionToken = secureToken.create()
-    let hash = secureToken.hash(sessionToken, 'session')
-    this.session_token
+    let sessionToken = SecureToken.create()
+    this.session_token = SecureToken.hash(sessionToken, 'session').toString('base64')
     return sessionToken
   }
 
@@ -36,7 +33,8 @@ class User extends ActiveRecord {
     }
     this.validatesPresenceOf('first_name')
     this.validatesPresenceOf('last_name')
-    this.validatesPresenceOfEncrypted('password')
+    if (!this.id) this.validatesPresenceOfEncrypted('password')
+    if (!this.id) this.validatesLengthOf('password', 8)
     return this.errorsEmpty()
   }
 

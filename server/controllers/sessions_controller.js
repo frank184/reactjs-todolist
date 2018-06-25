@@ -9,13 +9,9 @@ class SessionsController extends ApplicationController {
         user.isPassword(this.req.body.password, isPass => {
           if (isPass) {
             let sessionToken = user.generateSessionToken()
-            this.res.writeHead(204, {
-              'Set-Cookie': [
-                `sessionToken=${secureToken.toString('base64')}`,
-                'HttpOnly',
-                'Secure'
-              ].join(';')
-            })
+            user.save()
+            // this.res.cookie('sessionToken', sessionToken.toString('base64'), { httpOnly: true, secure: true })
+            this.res.cookie('sessionToken', sessionToken.toString('base64'), { httpOnly: true })
             return this.res.json(user)
           } else {
             return this.res.json(errors)
@@ -28,6 +24,15 @@ class SessionsController extends ApplicationController {
 
   /* DELETE sessions.json */
   delete() {
+    currentUser(user => {
+      if (user) {
+        user.update({session_token: ''})
+        this.res.cookie('sessionToken', '')
+        this.res.status(204).send()
+      } else {
+        this.res.status(404).send()
+      }
+    })
 
   }
 }

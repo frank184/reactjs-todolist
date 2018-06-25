@@ -19,8 +19,8 @@ class ActiveModel {
   }
 
   validatesPresenceOfEncrypted(column) {
-    let encrypted_column = 'encrypted_' + column
-    if (!new Boolean(this[encrypted_column]).valueOf())
+    let private_column = '_' + column
+    if (!new Boolean(this[private_column]).valueOf())
       this.addError(column, 'cannot be blank')
     else this.removeError(column, 'cannot be blank')
   }
@@ -31,9 +31,20 @@ class ActiveModel {
     else this.removeError(column, 'invalid format')
   }
 
+  validatesLengthOf(column, min, max) {
+    let msg = `must be at least ${min} characters long`
+    let condition = this[column] && this[column].length >= min
+    if (max) {
+      msg = `${msg} and at most ${max}`
+      condition = condition && this[column].length <= max
+    }
+    if (condition) this.removeError(column, msg)
+    else this.addError(column, msg)
+  }
+
   validatesUniquenessOf(column) {
-    let db = new SyncDBAdapter(),
-        record = db.prepare(`SELECT 1 FROM users WHERE ${column} = ?`).get(this[column])
+    let db = new SyncDBAdapter()
+    let record = db.prepare(`SELECT 1 FROM users WHERE ${this.id ? 'id != ' + this.id + ' AND ': ''} ${column} = ?`).get(this[column])
     if (record) this.addError(column, 'already exists')
     else this.removeError(column, 'already exists')
   }

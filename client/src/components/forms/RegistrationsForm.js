@@ -61,9 +61,10 @@ class RegistrationsForm extends Base {
 
   handleFailure(errors) {
     let errorsHTML = []
-    for (var key in errors) {
-      errorsHTML.push(<div>{this.fieldNames[key]} {errors[key]}</div>)
-      document.getElementById(key).classList.add('error')
+    for (var field in errors) {
+      for(var i = 0; i < errors[field].length; i++)
+        errorsHTML.push(<div key={`${field}.${i}`}>{this.fieldNames[field]} {errors[field][i]}</div>)
+      document.getElementById(field).classList.add('error')
     }
     this.setState({
       user: this.state.user,
