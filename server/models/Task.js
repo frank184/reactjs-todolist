@@ -16,7 +16,10 @@ class Task extends ActiveRecord {
       id: this.id,
       title: this.title,
       completed: this.completed,
-      errors: this.errors
+      errors: this.errors,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+      due_at: this.due_at
     }
   }
 }

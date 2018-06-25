@@ -25,6 +25,12 @@ class User extends ActiveRecord {
     return sessionToken
   }
 
+  generateResetPasswordToken(next) {
+    let resetPasswordToken = SecureToken.create()
+    this.reset_password_token = SecureToken.hash(resetPasswordToken, 'session')
+    return resetPasswordToken
+  }
+
   valid() {
     this.validatesPresenceOf('email')
     if (this.email && this.email.length !== 0) {
@@ -43,7 +49,9 @@ class User extends ActiveRecord {
       email: this.email,
       first_name: this.first_name,
       last_name: this.last_name,
-      errors: this.errors
+      errors: this.errors,
+      created_at: this.created_at,
+      updated_at: this.updated_at
     }
   }
 }

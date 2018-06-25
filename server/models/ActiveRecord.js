@@ -133,6 +133,9 @@ class ActiveRecord extends ActiveModel {
       if (next) next.call(this, task)
       return false
     }
+
+    task.created_at = new Date().toUTCString()
+
     var sanitized_columns = this.columns.slice(1)
     var params = sanitized_columns.map((column) => {
       return (column.type === 'boolean' ? (task[column.name] === true ? 1 : 0) : task[column.name])
@@ -159,6 +162,9 @@ class ActiveRecord extends ActiveModel {
       if (next) next.call(this)
       return false
     }
+
+    this.created_at = new Date().toUTCString()
+
     var sanitized_columns = this.constructor.columns.slice(1)
     var params = sanitized_columns.map((column) => {
       return (column.type === 'boolean' ? (this[column.name] === true ? 1 : 0) : this[column.name])
@@ -185,6 +191,9 @@ class ActiveRecord extends ActiveModel {
       if (next) next.call(this)
       return false
     }
+
+    this.updated_at = new Date().toUTCString()
+
     this.constructor.columns.forEach(column => {
       if(column.name !== 'id' && options[column.name] !== undefined)
         this[column.name] = options[column.name]
@@ -227,6 +236,16 @@ class ActiveRecord extends ActiveModel {
     if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
+      if (err) throw err
+      if (next) next.call(this)
+    }).close()
+  }
+
+  static deleteAll(next) {
+    var sql = `DELETE FROM ${this.table}`
+    if(this.log) console.log(' -- [SQL] ' + sql)
+    var db = new DBAdapter()
+    db.get(sql, [], (err, row) => {
       if (err) throw err
       if (next) next.call(this)
     }).close()

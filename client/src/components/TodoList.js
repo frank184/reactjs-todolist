@@ -1,6 +1,7 @@
 import React from 'react';
 import Item from './Item'
 import TasksAPI from '../api/TasksAPI'
+import Datetime from 'react-datetime'
 
 import './TodoList.css';
 
@@ -21,12 +22,23 @@ class TodoList extends React.Component {
     return (
       <div className="container">
         <div className="todo-list">
-          <h1 className="page-header">
-            Todo List
-            <div className="form-group pull-right">
-              <input id="newTask" type="text" className="form-control input-md" onKeyPress={(e) => this.handleNewTask(e)}></input>
+
+          <div className="row page-header">
+            <div className="col-sm-6">
+              <h1>Todo List</h1>
             </div>
-          </h1>
+            <div className="col-sm-3">
+              <Datetime inputProps={{placeholder: 'Due'}}/>
+            </div>
+            <div className="col-sm-3">
+              <div className="form-group pull-right">
+                <input id="newTask" type="text" placeholder="Title"
+                        className="form-control input-md"
+                        onKeyPress={(e) => this.handleNewTask(e)}></input>
+              </div>
+            </div>
+          </div>
+
           <ul className="list-group">
             {this.renderItems(this.state.items)}
           </ul>
@@ -41,10 +53,11 @@ class TodoList extends React.Component {
     return <Item  key={item.id}
                   id={item.id}
                   title={item.title}
+                  due_at={item.due_at}
                   completed={item.completed}
                   onCheckboxClick={() => this.toggleCompleted(item)}
                   handleDeleteTask={() => this.handleDeleteTask(item)}
-                  toggleTitleField={(e) => this.toggleTitleField(e)}
+                  toggleField={(e) => this.toggleField(e)}
                   handleTitleUpdate={(e) => this.handleTitleUpdate(e, item)} />
   }
 
@@ -117,7 +130,7 @@ class TodoList extends React.Component {
     })
   }
 
-  toggleTitleField(e) {
+  toggleField(e) {
     var elem = e.target
     var isInputText = elem instanceof HTMLInputElement && elem.type === 'text'
     var otherElem = isInputText ? elem.previousSibling : elem.nextSibling
