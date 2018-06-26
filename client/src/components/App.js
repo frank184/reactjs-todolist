@@ -55,7 +55,7 @@ class App extends React.Component {
                   handleDismiss={e => this.handleDismissFlash(e)}>
             {this.state.flash.children}
           </Flash>
-          <Route path="/" component={TodoList} />
+          <Route exact path="/" component={TodoList} />
           <Route exact path="/registrations/new" component={Registrations.New} />
           <Route exact path="/registrations/edit" component={Registrations.Edit} />
           <Route exact path="/sessions/new" component={Sessions.New} />

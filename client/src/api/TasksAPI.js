@@ -1,6 +1,6 @@
-import Base from './Base'
+import APIBase from './APIBase'
 
-class TasksAPI extends Base {
+class TasksAPI extends APIBase {
   static index() {
     return this.api('/tasks.json', 'GET')
   }

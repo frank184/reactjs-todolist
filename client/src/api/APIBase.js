@@ -1,7 +1,7 @@
 import 'whatwg-fetch'
 
 
-class Base {
+class APIBase {
   static parseJSON = (response) => response.json()
   static checkStatus = (response) => {
     if (response.status >= 500) throw 'Server Internal Error'
@@ -27,4 +27,4 @@ class Base {
   }
 }
 
-export default Base
+export default APIBase

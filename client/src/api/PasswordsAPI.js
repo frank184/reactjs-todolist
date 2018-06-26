@@ -1,6 +1,6 @@
-import Base from './Base'
+import APIBase from './APIBase'
 
-class PasswordsAPI extends Base {
+class PasswordsAPI extends APIBase {
   static create(user) {
     return this.api('/passwords.json', 'POST', user)
   }

@@ -1,12 +1,12 @@
 import React from 'react'
 import {Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
-import Base from './Base'
+import Form from './Form'
 import Flash from '../Flash'
 
 import SessionsAPI from '../../api/SessionsAPI'
 
-class SessionsForm extends Base {
+class SessionsForm extends Form {
   constructor(props) {
     super(props)
     this.state = {

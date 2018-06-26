@@ -1,8 +1,8 @@
 import React from 'react'
-import Base from './Base'
+import Form from './Form'
 import {Button} from 'react-bootstrap'
 
-class PasswordResetsForm extends Base {
+class PasswordResetsForm extends Form {
   render() {
     return <div>
       <div className="row">

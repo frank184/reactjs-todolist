@@ -1,12 +1,12 @@
 import React from 'react'
-import Base from './Base'
+import Form from './Form'
 import {Button} from 'react-bootstrap'
 import {Link} from 'react-router-dom'
 import Flash from '../Flash'
 
 import RegistrationsAPI from '../../api/RegistrationsAPI'
 
-class RegistrationsForm extends Base {
+class RegistrationsForm extends Form {
   constructor(props) {
     super(props)
     this.mode = props.mode
