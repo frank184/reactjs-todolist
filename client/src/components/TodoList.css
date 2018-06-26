@@ -26,7 +26,12 @@
   display: inline-block;
 }
 
-
 .invisible {
   display: none !important;
+}
+
+.form-controls {
+    display: block;
+    width: 100%;
+    font-size: 14px;
 }

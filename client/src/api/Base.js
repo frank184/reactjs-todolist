@@ -5,9 +5,9 @@ class Base {
   static parseJSON = (response) => response.json()
   static checkStatus = (response) => {
     if (response.status >= 500) throw 'Server Internal Error'
-    if (response.status == 401) throw 'Unauthorized'
-    if (response.status == 403) throw 'Forbidden'
-    if (response.status == 404) throw 'Not Found'
+    if (response.status === 401) throw 'Unauthorized'
+    if (response.status === 403) throw 'Forbidden'
+    if (response.status === 404) throw 'Not Found'
     else return response
   }
 

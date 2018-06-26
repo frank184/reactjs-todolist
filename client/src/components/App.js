@@ -7,6 +7,7 @@ import Sessions from './Sessions'
 import Passwords from './Passwords'
 
 import {BrowserRouter as Router, Route} from 'react-router-dom'
+import PrivateRoute from './router/PrivateRoute'
 
 import {Button} from 'react-bootstrap'
 
@@ -54,7 +55,7 @@ class App extends React.Component {
                   handleDismiss={e => this.handleDismissFlash(e)}>
             {this.state.flash.children}
           </Flash>
-          <Route exact path="/" component={TodoList} />
+          <Route path="/" component={TodoList} />
           <Route exact path="/registrations/new" component={Registrations.New} />
           <Route exact path="/registrations/edit" component={Registrations.Edit} />
           <Route exact path="/sessions/new" component={Sessions.New} />

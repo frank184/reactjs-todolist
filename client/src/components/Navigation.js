@@ -16,6 +16,7 @@ var Navigation = (props) => (
   </Navbar>
 )
 
+
 var UnauthedNavItems = () => (
   <Nav pullRight>
     <li><Link to="/sessions/new">Sign In</Link></li>

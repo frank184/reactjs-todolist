@@ -23,21 +23,23 @@ class TodoList extends React.Component {
       <div className="container">
         <div className="todo-list">
 
-          <div className="row page-header">
+          <h1 className="row page-header">
             <div className="col-sm-6">
-              <h1>Todo List</h1>
+              Todo List
             </div>
             <div className="col-sm-3">
-              <Datetime inputProps={{placeholder: 'Due'}}/>
+              <div className="form-group form-controls">
+                <Datetime inputProps={{placeholder: 'Due'}}/>
+              </div>
             </div>
             <div className="col-sm-3">
-              <div className="form-group pull-right">
+              <div className="form-group">
                 <input id="newTask" type="text" placeholder="Title"
                         className="form-control input-md"
                         onKeyPress={(e) => this.handleNewTask(e)}></input>
               </div>
             </div>
-          </div>
+          </h1>
 
           <ul className="list-group">
             {this.renderItems(this.state.items)}
@@ -71,19 +73,20 @@ class TodoList extends React.Component {
   handleNewTask(e) {
     if (e.which !== 13) return
     TasksAPI.create({ title: e.target.value }).then(itemJSON => {
-      var newTaskInput = document.querySelector('#newTask')
+      var inputTitle = document.querySelector('#title')
+      var inputDueAt = document.querySelector('#due_at')
       if (Object.keys(itemJSON.errors).length !== 0) {
         for (var error in itemJSON.errors)
-          newTaskInput.placeholder = error + ' ' + itemJSON.errors[error]
-        newTaskInput.classList.add('error')
-        newTaskInput.classList.remove('success')
+          inputTitle.placeholder = error + ' ' + itemJSON.errors[error]
+        inputTitle.classList.add('error')
+        inputTitle.classList.remove('success')
       } else {
         var newItems = this.state.items
         newItems.push(itemJSON)
         this.setState({ items: newItems })
-        newTaskInput.classList.add('success')
-        newTaskInput.classList.remove('error')
-        newTaskInput.placeholder = ''
+        inputTitle.classList.add('success')
+        inputTitle.classList.remove('error')
+        inputTitle.placeholder = ''
       }
     })
     e.target.value = ''
