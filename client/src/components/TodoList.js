@@ -29,12 +29,12 @@ class TodoList extends React.Component {
             </div>
             <div className="col-sm-3">
               <div className="form-group form-controls">
-                <Datetime inputProps={{placeholder: 'Due'}}/>
+                <Datetime inputProps={{id: 'due_at', placeholder: 'Due'}}/>
               </div>
             </div>
             <div className="col-sm-3">
               <div className="form-group">
-                <input id="newTask" type="text" placeholder="Title"
+                <input id="title" type="text" placeholder="Title" autoComplete="off"
                         className="form-control input-md"
                         onKeyPress={(e) => this.handleNewTask(e)}></input>
               </div>
@@ -72,9 +72,12 @@ class TodoList extends React.Component {
 
   handleNewTask(e) {
     if (e.which !== 13) return
-    TasksAPI.create({ title: e.target.value }).then(itemJSON => {
-      var inputTitle = document.querySelector('#title')
-      var inputDueAt = document.querySelector('#due_at')
+    var inputTitle = document.querySelector('#title')
+    var inputDueAt = document.querySelector('#due_at')
+    TasksAPI.create({
+      title: inputTitle.value,
+      due_at: inputDueAt.value
+    }).then(itemJSON => {
       if (Object.keys(itemJSON.errors).length !== 0) {
         for (var error in itemJSON.errors)
           inputTitle.placeholder = error + ' ' + itemJSON.errors[error]

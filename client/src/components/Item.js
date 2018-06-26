@@ -15,7 +15,9 @@ var Item = (props) => (
         <input type="text" className="form-control input-sm inline-inputs invisible" onKeyPress={(e) => props.handleTitleUpdate(e, props) } onBlur={props.toggleField}></input>
       </div>
       <div className="col-sm-5">
-        <i className="text-right" onClick={props.toggleField}>{props.due_at && props.due_at !== '' ? `due ${moment(props.due_at).fromNow()}` : ''}</i>
+        <i onClick={props.toggleField}>
+          {props.due_at && props.due_at !== '' ? `due ${moment(props.due_at).fromNow()}` : ''}
+        </i>
         <Datetime className="invisible" value={props.due_at} />
       </div>
       <div className="col-sm-1">
