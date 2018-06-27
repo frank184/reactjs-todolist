@@ -4,6 +4,9 @@ var SyncDBAdapter = require('../db/sync_connection')
 
 var ActiveModel = require('./active_model')
 
+/***
+* ActiveRecordJS - all db calls need to be refactored to call a real DB Adapter
+***/
 class ActiveRecord extends ActiveModel {
   constructor(options = {}) {
     super(options)
@@ -16,6 +19,10 @@ class ActiveRecord extends ActiveModel {
       else if (!this[column.name]) this[column.name] = options[column.name]
     })
   }
+
+  /***
+  * Static methods
+  ***/
 
   static init(log) {
     return this.initialize(log)
@@ -132,7 +139,6 @@ class ActiveRecord extends ActiveModel {
   }
 
   static whereSync(conditions = {}) {
-    var tasks = []
     var where = []
     var params = []
     for (var key in conditions) {
@@ -143,12 +149,7 @@ class ActiveRecord extends ActiveModel {
     if(this.log) console.log(' -- [SQL] ' + sql, params)
     var db = new SyncDBAdapter()
     var rows = db.prepare(sql).all(params)
-    tasks = rows.map(row => new this(row))
-    // db.all(sql, params, (err, rows) => {
-    //   rows.forEach((row) => { tasks.push(new this(row)) })
-    //   if (next) next.call(this, tasks)
-    // }).close()
-    return tasks
+    return rows.map(row => new this(row))
   }
 
   static create(options, next) {
@@ -191,7 +192,7 @@ class ActiveRecord extends ActiveModel {
       if (name === 'updated_at') {
         sanitized_column_assignements.push('updated_at = ?')
         params.push(new Date().toUTCString())
-      } else if (options[name]) {
+      } else if (options[name] !== undefined && options[name] !== null) {
         sanitized_column_assignements.push(`${name} = ?`)
         params.push(options[name])
       }
@@ -206,6 +207,68 @@ class ActiveRecord extends ActiveModel {
     }).close()
     return true
   }
+
+  static updateAll(options = {}, next) {
+    var sanitized_columns = this.columns.slice(1)
+    var sanitized_column_names = sanitized_columns.map(column => column.name)
+
+    var params = []
+    var sanitized_column_assignements = []
+    sanitized_column_names.forEach(name => {
+      if (name === 'updated_at') {
+        sanitized_column_assignements.push('updated_at = ?')
+        params.push(new Date().toUTCString())
+      } else if (options[name] !== undefined && options[name] !== null) {
+        sanitized_column_assignements.push(`${name} = ?`)
+        params.push(options[name])
+      }
+    })
+
+    var sql = `UPDATE ${this.table} SET ${sanitized_column_assignements} WHERE id IN (SELECT id FROM ${this.table});`
+    if (this.log) console.log(' -- [SQL] ' + sql, params)
+    var db = new DBAdapter()
+    db.get(sql, params, (err, row) => {
+      if (err) throw err
+      if (next) next.call(this, true)
+    }).close()
+    return true
+  }
+
+  static delete(id, next) {
+    var sql = `DELETE FROM ${this.table} WHERE id = ?`
+    var params = [id]
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
+    var db = new DBAdapter()
+    db.get(sql, params, (err, row) => {
+      if (err) throw err
+      if (next) next.call(this)
+    }).close()
+  }
+
+  static deleteAll(next) {
+    var sql = `DELETE FROM ${this.table}`
+    if(this.log) console.log(' -- [SQL] ' + sql)
+    var db = new DBAdapter()
+    db.get(sql, [], (err, row) => {
+      if (err) throw err
+      if (next) next.call(this)
+    }).close()
+  }
+static exists(id, next) {
+    if (!id) return next.call(this, false)
+    var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
+    var params = [id]
+    if(this.log) console.log(' -- [SQL] ' + sql, params)
+    var db = new DBAdapter()
+    db.get(sql, params, (err, row) => {
+      if (err) throw err
+      if (next) next.call(this, row.count !== 0)
+    }).close()
+  }
+
+  /***
+  * Instance methods
+  ***/
 
   create(next) {
     if ( !this.valid() ) {
@@ -280,27 +343,6 @@ class ActiveRecord extends ActiveModel {
     }
   }
 
-  static delete(id, next) {
-    var sql = `DELETE FROM ${this.table} WHERE id = ?`
-    var params = [id]
-    if(this.log) console.log(' -- [SQL] ' + sql, params)
-    var db = new DBAdapter()
-    db.get(sql, params, (err, row) => {
-      if (err) throw err
-      if (next) next.call(this)
-    }).close()
-  }
-
-  static deleteAll(next) {
-    var sql = `DELETE FROM ${this.table}`
-    if(this.log) console.log(' -- [SQL] ' + sql)
-    var db = new DBAdapter()
-    db.get(sql, [], (err, row) => {
-      if (err) throw err
-      if (next) next.call(this)
-    }).close()
-  }
-
   delete(next) {
     var sql = `DELETE FROM ${this.table} WHERE id = ?`
     var params = [this.id]
@@ -309,18 +351,6 @@ class ActiveRecord extends ActiveModel {
     db.get(sql, params, (err, row) => {
       if (err) throw err
       if (next) next.call(this)
-    }).close()
-  }
-
-  static exists(id, next) {
-    if (!id) return next.call(this, false)
-    var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
-    var params = [id]
-    if(this.log) console.log(' -- [SQL] ' + sql, params)
-    var db = new DBAdapter()
-    db.get(sql, params, (err, row) => {
-      if (err) throw err
-      if (next) next.call(this, row.count !== 0)
     }).close()
   }
 
