@@ -1,5 +1,5 @@
-User = require('../models/User').init(true)
-Task = require('../models/Task').init(true)
+User = require('../app/models/User').init(true)
+Task = require('../app/models/Task').init(true)
 
 
 User.create({email: 'user@mail.com', first_name: 'John', last_name: 'Cena', password: 'password'})

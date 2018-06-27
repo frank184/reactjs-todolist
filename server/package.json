@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "mocha"
+    "test": "mocha",
   },
   "dependencies": {
     "bcrypt": "^2.0.1",
     "better-sqlite3": "^4.1.4",
+    "caller-id": "^0.1.0",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.4",
     "debug": "~2.6.9",
@@ -20,7 +21,9 @@
     "morgan-body": "^2.4.0",
     "node-gyp": "git+https://github.com/nodejs/node-gyp.git",
     "pluralize": "^7.0.0",
+    "pug": "^2.0.3",
     "secure-token": "^1.0.0",
+    "sendgrid": "^5.2.3",
     "sqlite3": "^4.0.0",
     "wait.for": "^0.6.6",
     "waitfor": "^0.1.3"

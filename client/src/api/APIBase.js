@@ -1,6 +1,5 @@
 import 'whatwg-fetch'
 
-
 class APIBase {
   static parseJSON = (response) => response.json()
   static checkStatus = (response) => {
@@ -9,6 +8,26 @@ class APIBase {
     if (response.status === 403) throw 'Forbidden'
     if (response.status === 404) throw 'Not Found'
     else return response
+  }
+
+  static index() {
+    return this.api(this.url, 'GET')
+  }
+
+  static find(id) {
+    return this.api(`${this.url}/${id}`, 'GET')
+  }
+
+  static create(obj) {
+    return this.api(this.url, 'POST', obj)
+  }
+
+  static update(obj) {
+    return this.api(`${this.url}/${obj.id}`, 'PUT', obj)
+  }
+
+  static delete(id) {
+    return this.api(`${this.url}/${id}`, 'DELETE')
   }
 
   static api(url, method, body) {

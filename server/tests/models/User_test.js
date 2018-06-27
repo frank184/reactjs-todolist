@@ -1,5 +1,5 @@
 const assert = require('assert')
-const User = require('../../models/User').init()
+const User = require('../../app/models/User').init()
 const SecureToken = require('secure-token')
 
 function it_hasDBColumn(colum) {
@@ -35,17 +35,17 @@ function it_isInvalid(options) {
 describe('User', () => {
   describe('db', () => {
     it_hasDBColumn({name: 'id', type: 'integer'})
-    it_hasDBColumn({name: 'email', type: 'varchar(255)'})
-    it_hasDBColumn({name: 'first_name', type: 'varchar(255)'})
-    it_hasDBColumn({name: 'last_name', type: 'varchar(255)'})
-    it_hasDBColumn({name: 'encrypted_password', type: 'varchar(255)'})
-    it_hasDBColumn({name: 'session_token', type: 'varchar(255)'})
+    it_hasDBColumn({name: 'email', type: 'text'})
+    it_hasDBColumn({name: 'first_name', type: 'text'})
+    it_hasDBColumn({name: 'last_name', type: 'text'})
+    it_hasDBColumn({name: 'encrypted_password', type: 'text'})
+    it_hasDBColumn({name: 'session_token', type: 'text'})
   })
 
   describe('validation', () => {
     it_validatesPresenceOf('email')
     describe('email undefined', () => {
-      it('should not validate format of `email`', () => {
+      it('should not validate format of email', () => {
         var user = User.new()
         assert.equal(user.valid(), false)
         assert.equal(user.errors.email.includes('invalid format'), false)

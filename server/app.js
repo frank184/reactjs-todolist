@@ -15,27 +15,30 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+app.set('views', __dirname + '/app/views');
+app.set('view engine', 'pug');
 
 // app models
-global.Task = Task = require('./models/Task').init(true)
-global.User = User = require('./models/User').init(true)
+global.Task = Task = require('./app/models/task').init(true)
+global.User = User = require('./app/models/user').init(true)
 
-// app root
-app.use('/', require('./routes/tasks'));
-// tasks routes
-app.use('/tasks', require('./routes/tasks'));
-app.use('/tasks.json', require('./routes/tasks'));
-// sessions routes
-app.use('/sessions', require('./routes/sessions'))
-app.use('/sessions.json', require('./routes/sessions'))
-// registrations routes
-app.use('/registrations', require('./routes/registrations'))
-app.use('/registrations.json', require('./routes/registrations'))
-// passwords routes
-app.use('/passwords', require('./routes/passwords'))
-app.use('/passwords.json', require('./routes/passwords'))
+// app routes
+app.use('/', require('./config/routes'));
+
+// // app root
+// app.use('/', require('./routes/tasks'));
+// // tasks routes
+// app.use('/tasks', require('./routes/tasks'));
+// app.use('/tasks.json', require('./routes/tasks'));
+// // sessions routes
+// app.use('/sessions', require('./routes/sessions'))
+// app.use('/sessions.json', require('./routes/sessions'))
+// // registrations routes
+// app.use('/registrations', require('./routes/registrations'))
+// app.use('/registrations.json', require('./routes/registrations'))
+// // passwords routes
+// app.use('/passwords', require('./routes/passwords'))
+// app.use('/passwords.json', require('./routes/passwords'))
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
