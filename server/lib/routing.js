@@ -2,6 +2,7 @@ var express = require('express')
 
 class Routing {
   constructor() {
+    this.route = ''
     this.scope = ''
     this.router = express.Router()
   }
@@ -12,8 +13,8 @@ class Routing {
   }
   match(verb, route, controller, action) {
     let routes = [
-      `/${this.scope ? this.scope : this.route}${route}`,
-      `/${this.scope ? this.scope : this.route}.json`
+      `/${this.scope !== '' ? this.scope : route}`,
+      `/${this.scope !== '' ? this.scope : route}.json`
     ]
     this.router[verb](routes, (req, res) => new controller(req, res, action))
   }
