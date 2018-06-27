@@ -3,7 +3,7 @@ var ApplicationController = require('./application_controller')
 class RegistrationsController extends ApplicationController {
   /* POST registrations.json */
   create() {
-    var user = User.new(this.req.body)
+    var user = User.new(this.user_params)
     user.save((saved) => {
       if (saved) {
         let sessionToken = user.generateSessionToken()
@@ -23,6 +23,15 @@ class RegistrationsController extends ApplicationController {
   /* DELETE registrations.json */
   delete() {
     currentUser(user => user.delete(() => this.res.json(user)))
+  }
+
+  get user_params() {
+    return {
+      email: this.req.body.email,
+      password: this.req.body.password,
+      first_name: this.req.body.first_name,
+      last_name: this.req.body.last_name,
+    }
   }
 }
 

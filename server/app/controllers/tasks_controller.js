@@ -16,7 +16,7 @@ class TasksController extends ApplicationController {
 
   /* POST tasks.json */
   create() {
-    var task = new Task(this.req.body)
+    var task = new Task(this.task_params)
     task.save(() => this.res.json(task))
   }
 
@@ -24,10 +24,8 @@ class TasksController extends ApplicationController {
   update() {
     var id = this.req.params.id
     Task.find(id, (task) => {
-      if (task)
-        task.update(this.req.body, () => this.res.json(task))
-      else
-        res.status(404).send()
+      if (task) task.update(this.task_params, () => this.res.json(task))
+      else res.status(404).send()
     })
   }
 
@@ -35,11 +33,17 @@ class TasksController extends ApplicationController {
   delete() {
     var id = this.req.params.id
     Task.find(id, (task) => {
-      if (task)
-        task.delete(() => this.res.json(task))
-      else
-        this.res.status(404).send()
+      if (task) task.delete(() => this.res.json(task))
+      else this.res.status(404).send()
     })
+  }
+
+  get task_params() {
+    return {
+      title: this.req.body.title,
+      completed: this.req.body.completed,
+      due_at: this.req.body.due_at
+    }
   }
 }
 
