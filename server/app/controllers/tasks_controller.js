@@ -8,7 +8,10 @@ class TasksController extends ApplicationController {
 
   show() {
     var id = this.req.params.id
-    Task.find(id, (task) => this.res.json(task))
+    Task.find(id, (task) => {
+      if (task) this.res.json(task)
+      else this.res.status(404).send()
+    })
   }
 
   /* POST tasks.json */

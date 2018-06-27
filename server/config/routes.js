@@ -1,34 +1,29 @@
 const Routing = require('../lib/routing')
 var routing = new Routing()
 
-var TasksController = require('../app/controllers/tasks_controller')
-var RegistrationsController = require('../app/controllers/registrations_controller')
-var SessionsController = require('../app/controllers/sessions_controller')
-var PasswordsController = require('../app/controllers/passwords_controller')
-
-routing.root(TasksController, 'index')
-routing.namespace('tasks', () => {
-  routing.get('/', TasksController, 'index')
-  routing.get('/:id', TasksController, 'show')
-  routing.post('/', TasksController, 'create')
-  routing.put('/:id', TasksController, 'create')
-  routing.delete('/:id', TasksController, 'create')
+routing.root('tasks', 'index')
+routing.namespace('/tasks', () => {
+  routing.get('/', 'tasks', 'index')
+  routing.get('/:id', 'tasks', 'show')
+  routing.post('/', 'tasks', 'create')
+  routing.put('/:id', 'tasks', 'create')
+  routing.delete('/:id', 'tasks', 'create')
 })
 
-routing.namespace('registrations', () => {
-  routing.post('/', RegistrationsController, 'create')
-  routing.put('/', RegistrationsController, 'update')
-  routing.delete('/', RegistrationsController, 'delete')
+routing.namespace('/registrations', () => {
+  routing.post('/', 'registrations', 'create')
+  routing.put('/', 'registrations', 'update')
+  routing.delete('/', 'registrations', 'delete')
 })
 
-routing.namespace('sessions', () => {
-  routing.post('/', SessionsController, 'create')
-  routing.delete('/', SessionsController, 'delete')
+routing.namespace('/sessions', () => {
+  routing.post('/', 'sessions', 'create')
+  routing.delete('/', 'sessions', 'delete')
 })
 
-routing.namespace('passwords', () => {
-  routing.post('/', PasswordsController, 'create')
-  routing.put('/', PasswordsController, 'update')
+routing.namespace('/passwords', () => {
+  routing.post('/', 'passwords', 'create')
+  routing.put('/', 'passwords', 'update')
 })
 
 module.exports = routing.router
