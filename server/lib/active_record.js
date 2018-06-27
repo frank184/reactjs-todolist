@@ -5,30 +5,49 @@ var SyncDBAdapter = require('../db/sync_connection')
 var ActiveModel = require('./active_model')
 
 /***
-* ActiveRecordJS - all db calls need to be refactored to call a real DB Adapter
+*   ActiveRecordJS - TODO: all db calls need to be refactored to call a real DB Adapter
+*     static:
+*       - table
+*       - columns
+*       - init(log = false)
+*       - new()
+*       - create()
+*       - all/Sync()
+*       - where/Sync()
+*       - find/Sync()
+*       - findBy/Sync()
+*       - exists()
+*       - update()
+*       - updateAll()
+*       - delete()
+*       - deleteAll()
+*     instance:
+*       - save()
+*       - createOrUpdate()
+*       - create()
+*       - update()
+*       - delete()
+*       - exists()
+*       - newRecord()
+*       - validatesUniquenessOf()
+*
 ***/
 class ActiveRecord extends ActiveModel {
   constructor(options = {}) {
     super(options)
-    this.loadColumns(options)
-  }
-
-  loadColumns(options) {
     this.constructor.columns.forEach((column) => {
       if (column.type == 'boolean') this[column.name] = (options[column.name] === 1 ? true : false)
       else if (!this[column.name]) this[column.name] = options[column.name]
     })
   }
 
-  /***
-  * Static methods
-  ***/
+  //
+  //
+  //  Static methods
+  //
+  //
 
-  static init(log) {
-    return this.initialize(log)
-  }
-
-  static initialize(log = false) {
+  static init(log = false) {
     this.log = log
     this.columns = []
     var sql = `PRAGMA table_info(${this.table})`
@@ -40,10 +59,6 @@ class ActiveRecord extends ActiveModel {
 
   static get table() {
     return pluralize(this.name).toLowerCase()
-  }
-
-  get table() {
-    return pluralize(this.constructor.name).toLowerCase()
   }
 
   static new(options) {
@@ -163,7 +178,11 @@ class ActiveRecord extends ActiveModel {
 
     var sanitized_columns = this.columns.slice(1)
     var params = sanitized_columns.map((column) => {
-      return (column.type === 'boolean' ? (task[column.name] === true ? 1 : 0) : task[column.name])
+      if (column.type === 'boolean')
+        return task[column.name] ? 1 : 0
+      else if (task[column.name] && column.name.endsWith('_at'))
+        return new Date(task[column.name]).toUTCString()
+      else return task[column.name]
     })
     var sanitized_column_names = sanitized_columns.map((column) => { return column.name })
     var values = Array.from(sanitized_column_names).fill('?')
@@ -184,17 +203,26 @@ class ActiveRecord extends ActiveModel {
 
   static update(ids, options = {}, next) {
     var sanitized_columns = this.columns.slice(1)
-    var sanitized_column_names = sanitized_columns.map(column => column.name)
+    var sanitized_column_assignements = []
 
     var params = []
-    var sanitized_column_assignements = []
-    sanitized_column_names.forEach(name => {
-      if (name === 'updated_at') {
+    sanitized_columns.forEach((column) => {
+      if (column.name === 'updated_at') {
         sanitized_column_assignements.push('updated_at = ?')
         params.push(new Date().toUTCString())
-      } else if (options[name] !== undefined && options[name] !== null) {
-        sanitized_column_assignements.push(`${name} = ?`)
-        params.push(options[name])
+      } else if (options.hasOwnProperty(column.name)) {
+        if (column.type === 'boolean') {
+          sanitized_column_assignements.push(`${column.name} = ?`)
+          params.push(options[column.name] ? 1 : 0)
+        } else if (column.name !== 'created_at' && column.name !== 'updated_at' && column.name.endsWith('_at')) {
+          if (options[column.name]) {
+            sanitized_column_assignements.push(`${column.name} = ?`)
+            params.push(new Date(options[column.name]).toUTCString())
+          } else {
+            sanitized_column_assignements.push(`${column.name} = ?`)
+            params.push(null)
+          }
+        }
       }
     })
 
@@ -210,17 +238,26 @@ class ActiveRecord extends ActiveModel {
 
   static updateAll(options = {}, next) {
     var sanitized_columns = this.columns.slice(1)
-    var sanitized_column_names = sanitized_columns.map(column => column.name)
+    var sanitized_column_assignements = []
 
     var params = []
-    var sanitized_column_assignements = []
-    sanitized_column_names.forEach(name => {
-      if (name === 'updated_at') {
+    sanitized_columns.forEach((column) => {
+      if (column.name === 'updated_at') {
         sanitized_column_assignements.push('updated_at = ?')
         params.push(new Date().toUTCString())
-      } else if (options[name] !== undefined && options[name] !== null) {
-        sanitized_column_assignements.push(`${name} = ?`)
-        params.push(options[name])
+      } else if (options.hasOwnProperty(column.name)) {
+        if (column.type === 'boolean') {
+          sanitized_column_assignements.push(`${column.name} = ?`)
+          params.push(options[column.name] ? 1 : 0)
+        } else if (column.name !== 'created_at' && column.name !== 'updated_at' && column.name.endsWith('_at')) {
+          if (options[column.name]) {
+            sanitized_column_assignements.push(`${column.name} = ?`)
+            params.push(new Date(options[column.name]).toUTCString())
+          } else {
+            sanitized_column_assignements.push(`${column.name} = ?`)
+            params.push(null)
+          }
+        }
       }
     })
 
@@ -254,7 +291,8 @@ class ActiveRecord extends ActiveModel {
       if (next) next.call(this)
     }).close()
   }
-static exists(id, next) {
+
+  static exists(id, next) {
     if (!id) return next.call(this, false)
     var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
     var params = [id]
@@ -266,9 +304,11 @@ static exists(id, next) {
     }).close()
   }
 
-  /***
-  * Instance methods
-  ***/
+  //
+  //
+  //  Instance methods
+  //
+  //
 
   create(next) {
     if ( !this.valid() ) {
@@ -280,11 +320,15 @@ static exists(id, next) {
 
     var sanitized_columns = this.constructor.columns.slice(1)
     var params = sanitized_columns.map((column) => {
-      return (column.type === 'boolean' ? (this[column.name] === true ? 1 : 0) : this[column.name])
+      if (column.type === 'boolean')
+        return this[column.name] ? 1 : 0
+      else if (this[column.name] && column.name.endsWith('_at'))
+        return new Date(this[column.name]).toUTCString()
+      else return this[column.name]
     })
     var sanitized_column_names = sanitized_columns.map((column) => { return column.name })
     var values = Array.from(sanitized_column_names).fill('?')
-    var sql = `INSERT INTO ${this.table} (${sanitized_column_names}) VALUES (${values});`
+    var sql = `INSERT INTO ${this.constructor.table} (${sanitized_column_names}) VALUES (${values});`
     if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.serialize(() => {
@@ -313,10 +357,14 @@ static exists(id, next) {
     })
     var sanitized_columns = this.constructor.columns.slice(1)
     var params = sanitized_columns.map((column) => {
-      return column.type === 'boolean' ? (this[column.name] ? 1 : 0) : this[column.name]
+      if (column.type === 'boolean')
+        return this[column.name] ? 1 : 0
+      else if (this[column.name] && column.name.endsWith('_at'))
+        return new Date(this[column.name]).toUTCString()
+      else return this[column.name]
     })
     var sanitized_column_names = sanitized_columns.map((column) => { return column.name + ' = ?' })
-    var sql = `UPDATE ${this.table} SET ${sanitized_column_names} WHERE id = ${this.id};`
+    var sql = `UPDATE ${this.constructor.table} SET ${sanitized_column_names} WHERE id = ${this.id};`
     if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
     db.get(sql, params, (err, row) => {
@@ -344,7 +392,7 @@ static exists(id, next) {
   }
 
   delete(next) {
-    var sql = `DELETE FROM ${this.table} WHERE id = ?`
+    var sql = `DELETE FROM ${this.constructor.table} WHERE id = ?`
     var params = [this.id]
     if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
@@ -356,7 +404,7 @@ static exists(id, next) {
 
   exists(next) {
     if (!this.id) return next.call(this, false)
-    var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
+    var sql = `SELECT COUNT(1) AS count FROM ${this.constructor.table} WHERE id = ?`
     var params = [this.id]
     if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()
@@ -368,7 +416,7 @@ static exists(id, next) {
 
   newRecord(next) {
     if (!this.id) return next.call(this, true)
-    var sql = `SELECT COUNT(1) AS count FROM ${this.table} WHERE id = ?`
+    var sql = `SELECT COUNT(1) AS count FROM ${this.constructor.table} WHERE id = ?`
     var params = [this.id]
     if (this.constructor.log) console.log(' -- [SQL] ' + sql, params)
     var db = new DBAdapter()

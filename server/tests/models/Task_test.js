@@ -1,5 +1,5 @@
 var assert = require('assert')
-var Task = require('../../app/models/Task').initialize()
+var Task = require('../../app/models/Task').init()
 
 describe('Task', () => {
   describe('db', () => {

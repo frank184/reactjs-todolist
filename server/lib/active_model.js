@@ -6,19 +6,19 @@ class ActiveModel {
   }
 
   defaultValueOf(column, defaultValue) {
-    if (!new Boolean(this[column]).valueOf())
+    if (!this[column])
       this[column] = defaultValue
   }
 
   validatesPresenceOf(column) {
-    if (!new Boolean(this[column]).valueOf())
+    if (!this[column])
       this.addError(column, 'cannot be blank')
     else this.removeError(column, 'cannot be blank')
   }
 
   validatesPresenceOfEncrypted(column) {
     let private_column = '_' + column
-    if (!new Boolean(this[private_column]).valueOf())
+    if (!this[private_column])
       this.addError(column, 'cannot be blank')
     else this.removeError(column, 'cannot be blank')
   }

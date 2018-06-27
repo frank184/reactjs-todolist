@@ -27,7 +27,7 @@ class User extends ApplicationRecord {
 
   generateResetPasswordToken(next) {
     let resetPasswordToken = SecureToken.create()
-    this.reset_password_token = SecureToken.hash(resetPasswordToken, 'session')
+    this.reset_password_token = SecureToken.hash(resetPasswordToken, 'session').toString('base64')
     return resetPasswordToken
   }
 

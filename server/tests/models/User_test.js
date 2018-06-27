@@ -40,6 +40,9 @@ describe('User', () => {
     it_hasDBColumn({name: 'last_name', type: 'text'})
     it_hasDBColumn({name: 'encrypted_password', type: 'text'})
     it_hasDBColumn({name: 'session_token', type: 'text'})
+    it_hasDBColumn({name: 'reset_password_token', type: 'text'})
+    it_hasDBColumn({name: 'created_at', type: 'text'})
+    it_hasDBColumn({name: 'updated_at', type: 'text'})
   })
 
   describe('validation', () => {
@@ -86,8 +89,7 @@ describe('User', () => {
       })
     })
     describe('invalid cases', () => {
-      [
-        {},
+      [ {},
         {email: '', first_name: '', last_name: '', password: ''},
         {email: '', first_name: 'a', last_name: '', password: ''},
         {email: '', first_name: 'a', last_name: 'b', password: ''},
@@ -114,6 +116,22 @@ describe('User', () => {
         assert.equal(sessionToken !== undefined, true)
         assert.equal(sessionToken instanceof SecureToken.constructor, true)
       })
-    })
-  })
-})
+    }) // generateSessionToken
+
+    describe('generateResetPasswordToken', () => {
+      it('should set the session_token', () => {
+        let user = User.new()
+        assert.equal(user.reset_password_token === undefined, true)
+        user.generateResetPasswordToken()
+        assert.equal(user.reset_password_token !== undefined, true)
+        assert.equal(typeof user.reset_password_token === 'string', true)
+      })
+      it('should return an instance of SecureToken', () => {
+        let user = User.new()
+        let sessionToken = user.generateResetPasswordToken()
+        assert.equal(sessionToken !== undefined, true)
+        assert.equal(sessionToken instanceof SecureToken.constructor, true)
+      })
+    }) // generateResetPasswordToken
+  }) // methods
+}) // User

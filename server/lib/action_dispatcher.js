@@ -3,6 +3,7 @@ class ActionDispatcher {
     this.req = req
     this.res = res
     this.action = action
+    this.sessionToken = this.req.cookies.sessionToken
     this.beforeAction()
     this[action]()
     this.afterAction()

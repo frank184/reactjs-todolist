@@ -22,6 +22,9 @@ app.set('view engine', 'pug');
 global.Task = Task = require('./app/models/task').init(true)
 global.User = User = require('./app/models/user').init(true)
 
+// Sessions should be kept in memory in a Map, not in users table
+// User.updateAll({session_token: ''})
+
 // app routes
 app.use('/', require('./config/routes'));
 

@@ -17,16 +17,15 @@ class ApplicationController extends ActionDispatcher {
   }
 
   currentUser(next) {
-    let hash = ''
-    let sessionToken = this.req.cookies.sessionToken
-    if (sessionToken) {
-      let buffer = Buffer.from(sessionToken, 'base64')
-      hash = secureToken.hash(buffer, 'session').toString('base64')
+    if (this.sessionToken) {
+      let buffer = Buffer.from(this.sessionToken, 'base64')
+      let hash = secureToken.hash(buffer, 'session').toString('base64')
+      User.findBy({session_token: hash}, user => {
+        if (next) next.call(this, user)
+      })
     }
-    User.findBy({session_token: hash}, user => {
-      if (next) next.call(this, user)
-    })
+    if (next) next.call(this)
   }
-}
+} // end of class
 
 module.exports = ApplicationController
