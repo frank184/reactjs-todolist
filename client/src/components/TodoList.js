@@ -59,8 +59,7 @@ class TodoList extends React.Component {
                   completed={item.completed}
                   onCheckboxClick={() => this.toggleCompleted(item)}
                   handleDeleteTask={() => this.handleDeleteTask(item)}
-                  toggleField={(e) => this.toggleField(e)}
-                  handleTitleUpdate={(e) => this.handleTitleUpdate(e, item)} />
+                  handleUpdateTask={(e) => this.handleUpdateTask(e, item)} />
   }
 
   renderItems(items) {
@@ -96,7 +95,7 @@ class TodoList extends React.Component {
   }
 
   handleDeleteTask(item) {
-    TasksAPI.delete(item).then(itemJSON => {
+    TasksAPI.delete(item.id).then(itemJSON => {
       var index = -1
       for (var key in this.state.items) {
         index++
@@ -118,7 +117,7 @@ class TodoList extends React.Component {
     })
   }
 
-  handleTitleUpdate(e, item) {
+  handleUpdateTask(e, item) {
     if (e.which !== 13) return
     var elem = e.target
     item.title = elem.value
@@ -134,19 +133,6 @@ class TodoList extends React.Component {
       otherElem.classList.add('visible')
       otherElem.focus()
     })
-  }
-
-  toggleField(e) {
-    var elem = e.target
-    var isInputText = elem instanceof HTMLInputElement && elem.type === 'text'
-    var otherElem = isInputText ? elem.previousSibling : elem.nextSibling
-
-    elem.classList.remove('visible')
-    elem.classList.add('invisible')
-    otherElem.classList.add('visible')
-    otherElem.classList.remove('invisible')
-    otherElem.value = elem.innerHTML.trim()
-    otherElem.focus()
   }
 }
 

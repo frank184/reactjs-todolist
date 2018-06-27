@@ -1,8 +1,9 @@
 const ApplicationController = require('./application_controller')
 const PasswordsMailer = require('../mailers/passwords_mailer')
+var url = require('url')
 
 class PasswordsController extends ApplicationController {
-  /* POST tasks.json */
+  /* POST passwords */
   create() {
     User.findBy({email: this.reset_password_params}, user => {
       if (user) {
@@ -15,9 +16,10 @@ class PasswordsController extends ApplicationController {
     })
   }
 
-  /* PUT tasks/1.json?reset_password_token=reset_password_token */
+  /* PUT passwords?reset_password_token=xxxxxxxxxxxxxxxxxxxxxxxxxxxx */
   update() {
-    let resetPasswordToken// = get querystring
+    let querystring = url.parse(request.url, true).query
+    let resetPasswordToken// = get resetPasswordToken querystring
     User.findBy({reset_password_token: reset_password_token}, user => {
       user.update(user_params)
       this.res.json(user)

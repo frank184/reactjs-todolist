@@ -1,7 +1,7 @@
 var ApplicationController = require('./application_controller')
 
 class SessionsController extends ApplicationController {
-  /* POST sessions.json */
+  /* POST sessions */
   create() {
     var errors = {errors: { email_or_password: 'Email address or password is incorrect' }}
     User.findBy({email: this.user_params.email}, user => {
@@ -23,7 +23,7 @@ class SessionsController extends ApplicationController {
     })
   }
 
-  /* DELETE sessions.json */
+  /* DELETE sessions */
   delete() {
     currentUser(user => {
       if (user) {

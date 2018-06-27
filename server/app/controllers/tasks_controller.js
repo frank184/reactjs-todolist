@@ -1,7 +1,7 @@
 var ApplicationController = require('./application_controller')
 
 class TasksController extends ApplicationController {
-  /* GET tasks.json */
+  /* GET tasks */
   index() {
     Task.all((tasks) => this.res.json(tasks))
   }
@@ -14,13 +14,13 @@ class TasksController extends ApplicationController {
     })
   }
 
-  /* POST tasks.json */
+  /* POST tasks */
   create() {
     var task = new Task(this.task_params)
     task.save(() => this.res.json(task))
   }
 
-  /* PUT tasks/1.json */
+  /* PUT tasks/1 */
   update() {
     var id = this.req.params.id
     Task.find(id, (task) => {
@@ -29,7 +29,7 @@ class TasksController extends ApplicationController {
     })
   }
 
-  /* DELETE tasks/1.json */
+  /* DELETE tasks/1 */
   delete() {
     var id = this.req.params.id
     Task.find(id, (task) => {

@@ -1,7 +1,7 @@
 var ApplicationController = require('./application_controller')
 
 class RegistrationsController extends ApplicationController {
-  /* POST registrations.json */
+  /* POST registrations */
   create() {
     var user = User.new(this.user_params)
     user.save((saved) => {
@@ -14,13 +14,13 @@ class RegistrationsController extends ApplicationController {
     })
   }
 
-  /* PUT registrations.json */
+  /* PUT registrations */
   update() {
     currentUser(user => user.update(user => this.res.json(user)))
     this.res.send(401).send()
   }
 
-  /* DELETE registrations.json */
+  /* DELETE registrations */
   delete() {
     currentUser(user => user.delete(() => this.res.json(user)))
   }

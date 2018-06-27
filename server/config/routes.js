@@ -7,8 +7,8 @@ routing.namespace('/tasks', () => {
   routing.get('/', 'tasks', 'index')
   routing.get('/:id', 'tasks', 'show')
   routing.post('/', 'tasks', 'create')
-  routing.put('/:id', 'tasks', 'create')
-  routing.delete('/:id', 'tasks', 'create')
+  routing.put('/:id', 'tasks', 'update')
+  routing.delete('/:id', 'tasks', 'delete')
 })
 
 routing.namespace('/registrations', () => {

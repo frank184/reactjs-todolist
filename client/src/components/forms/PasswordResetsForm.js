@@ -3,6 +3,10 @@ import Form from './Form'
 import {Button} from 'react-bootstrap'
 
 class PasswordResetsForm extends Form {
+  handleSubmit() {
+    console.log(this.props)
+  }
+
   render() {
     return <div>
       <div className="row">
@@ -11,7 +15,8 @@ class PasswordResetsForm extends Form {
         </div>
         <div className="col-sm-6">
           <div className="form-group">
-            <input autocomplete="off" type="text" className="form-control" onChange={e => this.handleChange(e)} />
+            <input autocomplete="off" type="text" className="form-control"
+              onChange={e => this.handleChange(e)} />
           </div>
         </div>
         <div className="col-sm-4">
