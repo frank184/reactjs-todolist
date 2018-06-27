@@ -1,6 +1,7 @@
 const Routing = require('../lib/routing')
 var routing = new Routing()
 
+// routing.root(controller, action)
 routing.root('tasks', 'index')
 routing.namespace('/tasks', () => {
   routing.get('/', 'tasks', 'index')

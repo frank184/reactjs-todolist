@@ -25,21 +25,6 @@ global.User = User = require('./app/models/user').init(true)
 // app routes
 app.use('/', require('./config/routes'));
 
-// // app root
-// app.use('/', require('./routes/tasks'));
-// // tasks routes
-// app.use('/tasks', require('./routes/tasks'));
-// app.use('/tasks.json', require('./routes/tasks'));
-// // sessions routes
-// app.use('/sessions', require('./routes/sessions'))
-// app.use('/sessions.json', require('./routes/sessions'))
-// // registrations routes
-// app.use('/registrations', require('./routes/registrations'))
-// app.use('/registrations.json', require('./routes/registrations'))
-// // passwords routes
-// app.use('/passwords', require('./routes/passwords'))
-// app.use('/passwords.json', require('./routes/passwords'))
-
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
