@@ -24,7 +24,7 @@ class Routing {
 
   match(verb, route, controller, action) {
     route = this.scope !== '' ? this.scope + route : route
-    this.router[verb]([route, route+'.json'], (req, res) => new this.controllers[controller](req, res, action))
+    this.router[verb](route, (req, res) => new this.controllers[controller](req, res, action))
   }
 
   root(controller, action) {
